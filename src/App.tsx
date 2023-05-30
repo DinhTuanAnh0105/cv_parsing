@@ -1,52 +1,73 @@
-import React, { Suspense } from "react";
-import logo from "./logo.svg";
+import { createContext, useEffect, useState } from "react";
 import "./App.css";
-import { BrowserRouter, Route, Routes, useRoutes } from "react-router-dom";
-import router from "./constants/router/router";
-import Loading from "./components/Loading";
-import { PathRoute } from "./constants/router/path";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import withAuthentication from "./HOCs/withAuthentication";
 
-// function App() {
-//   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <img src={logo} className="App-logo" alt="logo" />
-//         <p>
-//           Edit <code>src/App.tsx</code> and save to reload.
-//         </p>
-//         <a
-//           className="App-link"
-//           href="https://reactjs.org"
-//           target="_blank"
-//           rel="noopener noreferrer"
-//         >
-//           Learn React
-//         </a>
-//       </header>
-//     </div>
-//   );
-// }
+import Banner from "./components/Banner";
+import Header from "./components/HeaderCV";
+import Profile from "./components/Profile";
+import Project from "./components/Project";
+import Skills from "./components/Skills";
+import "./index.css";
+import httpMethod from "./services/httpMethod";
+import Archivement from "./components/Archivement";
+import Experiences from "./components/Experiences";
+import { message } from "antd";
+import SuspenseLoader from "./components/SuspenseLoader";
+import { isEmpty } from "lodash";
 
 const App = () => {
-  //! define
-  // const content = useRoutes(router)
+  const URL = "https://f3f7-103-238-72-45.ngrok-free.app/detect/json";
+
+  //! state
+  const [fileCV, setFileCV] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState({});
+
+  //! function
+  const getInfo = async () => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("cv_file", fileCV[0]);
+    try {
+      const response = await httpMethod.post(URL, formData, {
+        headers: {
+          "x-auth-secret-key": "833cc050348f60efef7ae7c48c42037ca6f74dd7",
+        },
+      });
+      if (response.status === 200) {
+        setData(response.data.data);
+        setLoading(false);
+      }
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //! useEffect
+  useEffect(() => {
+    getInfo();
+  }, [fileCV]);
+
+  useEffect(() => {
+    if (!isEmpty(data)) {
+      document
+        .getElementById("profile")
+        ?.scrollIntoView({block:'center', behavior: "smooth" });
+      message.success("Extract CV Success!");
+    }
+  }, [data]);
 
   //! render
   return (
-    <Suspense fallback={<Loading />}>
-      {/* {content} */}
-      <BrowserRouter>
-        <Routes>
-          {router.map((item) => {
-            return <Route path={item.path} element={item.component} />;
-          })}
-        </Routes>
-      </BrowserRouter>
-    </Suspense>
+    <div>
+      {loading && <SuspenseLoader />}
+      <Header data={data} />
+      <Banner setFileCV={setFileCV} />
+      <Profile data={data} />
+      <Experiences data={data} />
+      <Archivement data={data} />
+      <Skills data={data} />
+    </div>
   );
 };
 
