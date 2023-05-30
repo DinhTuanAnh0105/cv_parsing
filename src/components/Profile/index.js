@@ -3,6 +3,7 @@ import { isEmpty } from "lodash";
 import Avatar from "../../assets/images/img-profile.webp";
 import IconFacebook from "../icons/ic_facebook";
 import IconGithub from "../icons/ic_github";
+import IconLinkedin from "../icons/ic_linkedin";
 
 const Profile = ({ data }) => {
   const candidateProfile = data.candidate_profile;
@@ -139,10 +140,10 @@ const Profile = ({ data }) => {
                     <div
                       className="box-white"
                       onClick={() => {
-                        window.open(candidateProfile?.facebook);
+                        window.open(candidateProfile?.linkedin);
                       }}
                     >
-                      <IconGithub />
+                      <IconLinkedin />
                     </div>
                   )}
                 </div>
